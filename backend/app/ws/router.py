@@ -96,6 +96,11 @@ async def websocket_room_endpoint(
 
                 await manager.broadcast(room_id, outgoing)
 
+            elif msg_type == "ping":
+                try:
+                    await websocket.send_text(json.dumps({"type": "pong"}))
+                except Exception:
+                    pass
           
             else:
                 await manager.broadcast(room_id, {

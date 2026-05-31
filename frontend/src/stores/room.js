@@ -19,6 +19,7 @@ export const useRoomStore = defineStore('room', () => {
   // Refs (tidak reaktif)
   let socket = null
   let pollingInterval = null
+  let pingInterval = null
   let hasLeftRoom = false
 
   // Watch activeRoom untuk sync ke localStorage
@@ -171,11 +172,20 @@ export const useRoomStore = defineStore('room', () => {
           description: 'Anda masuk ke workspace',
         })
       }
+
+      // Ping to keep connection alive on Railway proxy
+      pingInterval = setInterval(() => {
+        if (ws.readyState === WebSocket.OPEN || ws.readyState === 1) {
+          ws.send(JSON.stringify({ type: 'ping' }))
+        }
+      }, 30000)
     }
 
     ws.onmessage = (e) => {
       console.log('[RoomStore] WebSocket message received:', e.data)
       const payload = JSON.parse(e.data)
+
+      if (payload.type === 'pong') return
 
       if (payload.type === 'chat') {
         console.log('[RoomStore] Adding chat message:', payload.data)
@@ -227,7 +237,12 @@ export const useRoomStore = defineStore('room', () => {
       }
     }
 
-    ws.onclose = () => {}
+    ws.onclose = () => {
+      if (pingInterval) {
+        clearInterval(pingInterval)
+        pingInterval = null
+      }
+    }
     socket = ws
   }
 
