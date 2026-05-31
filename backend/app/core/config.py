@@ -21,8 +21,8 @@ class Settings(BaseSettings):
     CLOUDINARY_API_KEY: str
     CLOUDINARY_API_SECRET: str
 
-    BACKEND_URL: str
-    FRONTEND_URL: str
+    BACKEND_URL: str = "https://groupmatchfe-production.up.railway.app"
+    FRONTEND_URL: str = "https://groupmatchfe-production.up.railway.app"
 
     class Config:
         
