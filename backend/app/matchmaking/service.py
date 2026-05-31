@@ -110,13 +110,14 @@ def try_process_match(db: Session):
         )
         db.add(member)
 
-        # 🔥 LOG JOIN
-        log_room_history(
-            db=db,
+        # 🔥 LOG JOIN (tanpa commit langsung agar tidak error ObjectDeleted)
+        history = RoomHistory(
             room_id=room.id,
             user_id=q.user_id,
-            action="join"
+            action="join",
+            timestamp=datetime.utcnow()
         )
+        db.add(history)
 
     db.commit()
 
