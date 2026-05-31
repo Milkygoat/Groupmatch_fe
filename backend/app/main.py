@@ -46,7 +46,7 @@ allowed_origins = [
 ]
 
 if ENV == "production":
-    allowed_origins.append("https://groupmatchuas-production.up.railway.app")
+    allowed_origins.append("https://groupmatchfe-production.up.railway.app")
 
 app.add_middleware(
     CORSMiddleware,
