@@ -147,6 +147,7 @@ export const useAuthStore = defineStore('auth', () => {
       }
 
       const payload = {
+        username: profileData.name.toLowerCase().replace(/\s+/g, '_'),
         name: profileData.name,
         birthdate: profileData.birthdate,
         role: profileData.role,
