@@ -37,6 +37,10 @@ watch(
 
 onMounted(() => {
   isInitialLoad.value = false
+  const hasSavedRoom = localStorage.getItem('activeRoom')
+  if (!roomStore.activeRoom && !hasSavedRoom) {
+    router.push('/dashboard')
+  }
 })
 
 watch(

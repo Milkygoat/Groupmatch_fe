@@ -20,6 +20,7 @@ export const useRoomStore = defineStore('room', () => {
   let socket = null
   let pollingInterval = null
   let pingInterval = null
+  let reconnectTimeout = null
   let hasLeftRoom = false
 
   // Watch activeRoom untuk sync ke localStorage
@@ -161,11 +162,21 @@ export const useRoomStore = defineStore('room', () => {
     const token = localStorage.getItem('token')
     if (!token) return
 
+    if (socket) {
+      socket.close()
+    }
+
     const wsUrl = `${SOCKET_URL}/ws/rooms/${roomId}?token=${token}`
     const ws = MOCK_MODE ? new MockWebSocket(wsUrl) : new WebSocket(wsUrl)
 
     ws.onopen = () => {
       console.log('[RoomStore] WebSocket connected, readyState:', ws.readyState)
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout)
+        reconnectTimeout = null
+      }
+      isReconnecting.value = false
+
       if (!isReconnect) {
         toast({
           title: 'Tim terbentuk',
@@ -237,10 +248,24 @@ export const useRoomStore = defineStore('room', () => {
       }
     }
 
-    ws.onclose = () => {
+    ws.onclose = (event) => {
+      console.log('[RoomStore] WebSocket closed', event.code)
       if (pingInterval) {
         clearInterval(pingInterval)
         pingInterval = null
+      }
+      socket = null
+
+      // Attempt to reconnect if we haven't explicitly left the room
+      // Code 4001/4002 are token auth failures, don't reconnect
+      if (!hasLeftRoom && activeRoom.value && event.code !== 4001 && event.code !== 4002) {
+        console.log('[RoomStore] Reconnecting in 3 seconds...')
+        isReconnecting.value = true
+        reconnectTimeout = setTimeout(() => {
+          if (!hasLeftRoom && activeRoom.value) {
+            connectWebSocket(activeRoom.value.id, true)
+          }
+        }, 3000)
       }
     }
     socket = ws
