@@ -43,11 +43,9 @@ app = FastAPI(debug=True)
 allowed_origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://groupmatchfe-production.up.railway.app",
+    "https://groupmatchfe.up.railway.app"
 ]
-
-if ENV == "production":
-    allowed_origins.append("https://groupmatchfe-production.up.railway.app")
-    allowed_origins.append("https://groupmatchfe.up.railway.app")
 
 app.add_middleware(
     CORSMiddleware,
