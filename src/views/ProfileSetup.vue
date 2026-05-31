@@ -18,7 +18,7 @@ import AvatarImage from '@/components/ui/AvatarImage.vue'
 import AvatarFallback from '@/components/ui/AvatarFallback.vue'
 import Select from '@/components/ui/Select.vue'
 import SelectItem from '@/components/ui/SelectItem.vue'
-import { User, Calendar, Briefcase, Tag, X, Camera, UserCircle } from 'lucide-vue-next'
+import { User, Calendar, Briefcase, Tag, X, Camera } from 'lucide-vue-next'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -100,7 +100,6 @@ const handleSubmit = async () => {
   loading.value = true
 
   try {
-    // 1. CREATE PROFILE DULU (TANPA AVATAR)
     await authStore.updateProfile({
       name: formData.value.name,
       birthdate: formData.value.birthdate,
@@ -108,7 +107,6 @@ const handleSubmit = async () => {
       skills: formData.value.skills
     })
 
-    // 2. BARU upload avatar (JIKA ADA)
     if (avatarFile.value) {
       const uploadResponse = await authStore.uploadAvatar(avatarFile.value)
       console.log('Avatar uploaded:', uploadResponse.avatar_url)
@@ -119,6 +117,8 @@ const handleSubmit = async () => {
       description: 'Anda dapat mulai mencari tim.'
     })
 
+    // Clear pending registration flag (if any) then go to dashboard
+    try { localStorage.removeItem('pendingProfileSetupEmail') } catch (e) { /* ignore */ }
     router.push('/dashboard')
   } catch (error) {
     console.error('Profile update failed:', error)
@@ -140,171 +140,145 @@ const selectRole = (value) => {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-cyan-50 via-white to-teal-50 px-4 py-8">
-    <!-- Background decoration -->
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-      <div class="absolute top-20 right-20 w-64 h-64 bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
-      <div class="absolute bottom-20 left-20 w-64 h-64 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
-    </div>
+  <div class="min-h-screen bg-[#f5faf7] px-4 py-8 text-slate-800">
+    <div class="mx-auto max-w-3xl">
+      <Card class="rounded-[2rem] border-emerald-100 bg-white shadow-xl shadow-emerald-100/50">
+        <CardHeader class="border-b border-emerald-100 px-6 py-6">
+          <CardTitle class="text-2xl font-semibold text-slate-950">Lengkapi profil belajar</CardTitle>
+          <CardDescription class="text-sm leading-6 text-slate-500">
+            Isi data utama yang dibutuhkan untuk proses pencarian tim.
+          </CardDescription>
+        </CardHeader>
 
-    <Card class="w-full max-w-2xl shadow-xl border-0 bg-white/90 backdrop-blur-sm rounded-2xl relative z-10">
-      <CardHeader class="space-y-3 text-center pb-6">
-        <div class="mx-auto mb-2">
-          <div class="w-14 h-14 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-2xl flex items-center justify-center shadow-lg mx-auto">
-            <UserCircle class="h-7 w-7 text-white" />
-          </div>
-        </div>
-        <h1 class="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-teal-500 bg-clip-text text-transparent">GroupMatch</h1>
-        <CardTitle class="text-xl font-bold text-slate-800">Lengkapi Profilmu</CardTitle>
-        <CardDescription class="text-slate-500">
-          Informasi ini membantu kami menemukan tim yang tepat untukmu
-        </CardDescription>
-      </CardHeader>
-
-      <CardContent class="px-6 pb-6">
-        <form @submit.prevent="handleSubmit" class="space-y-6">
-          <!-- Upload Foto Profil -->
-          <div class="flex flex-col items-center justify-center mb-6">
-            <div
-              class="relative cursor-pointer group"
-              @click="fileInputRef?.click()"
-            >
-              <Avatar class="h-24 w-24 border-4 border-white shadow-md">
-                <AvatarImage :src="formData.avatar" alt="Profile" class="object-cover" />
-                <AvatarFallback class="text-2xl bg-cyan-100 text-cyan-600">
-                  {{ formData.name ? formData.name.charAt(0).toUpperCase() : 'U' }}
-                </AvatarFallback>
-              </Avatar>
-
-              <!-- Overlay Edit -->
-              <div class="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                <Camera class="h-8 w-8 text-white" />
+        <CardContent class="p-6">
+          <form @submit.prevent="handleSubmit" class="space-y-7">
+            <div class="flex flex-col items-center rounded-3xl border border-emerald-100 bg-emerald-50/60 p-5 sm:flex-row sm:items-center sm:justify-between">
+              <div class="flex items-center gap-4">
+                <div class="group relative cursor-pointer" @click="fileInputRef?.click()">
+                  <Avatar class="h-24 w-24 border-4 border-white shadow-md">
+                    <AvatarImage :src="formData.avatar" alt="Profile" class="object-cover" />
+                    <AvatarFallback class="bg-white text-2xl text-emerald-700">
+                      {{ formData.name ? formData.name.charAt(0).toUpperCase() : 'U' }}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div class="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                    <Camera class="h-8 w-8 text-white" />
+                  </div>
+                  <div class="absolute bottom-0 right-0 rounded-full border-2 border-white bg-emerald-600 p-2 shadow-sm">
+                    <Camera class="h-4 w-4 text-white" />
+                  </div>
+                </div>
+                <div>
+                  <p class="font-semibold text-slate-900">Foto profil</p>
+                  <p class="mt-1 text-sm leading-6 text-slate-500">Gunakan foto yang mudah dikenali anggota tim.</p>
+                </div>
               </div>
 
-              <!-- Tombol Kamera Kecil -->
-              <div class="absolute bottom-0 right-0 bg-cyan-500 rounded-full p-2 border-2 border-white shadow-sm group-hover:scale-110 transition-transform">
-                <Camera class="h-4 w-4 text-white" />
+              <input
+                type="file"
+                ref="fileInputRef"
+                class="hidden"
+                accept="image/*"
+                @change="handleImageUpload"
+              />
+            </div>
+
+            <div class="grid gap-5 md:grid-cols-2">
+              <div class="space-y-2">
+                <Label for="name" class="text-slate-700">Nama Lengkap</Label>
+                <div class="relative">
+                  <User class="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Nama lengkap Anda"
+                    class="rounded-xl border-emerald-100 bg-slate-50 pl-10"
+                    v-model="formData.name"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <Label for="birthdate" class="text-slate-700">Tanggal Lahir</Label>
+                <div class="relative">
+                  <Calendar class="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                  <Input
+                    id="birthdate"
+                    type="date"
+                    class="rounded-xl border-emerald-100 bg-slate-50 pl-10"
+                    v-model="formData.birthdate"
+                    required
+                  />
+                </div>
               </div>
             </div>
-            <p class="text-sm text-slate-500 mt-2">Klik untuk mengubah foto</p>
 
-            <!-- Hidden Input File -->
-            <input
-              type="file"
-              ref="fileInputRef"
-              class="hidden"
-              accept="image/*"
-              @change="handleImageUpload"
-            />
-          </div>
-
-          <div class="space-y-2">
-            <Label for="name" class="text-slate-700">Nama Lengkap</Label>
-            <div class="relative">
-              <User class="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-              <Input
-                id="name"
-                type="text"
-                placeholder="Nama lengkap Anda"
-                class="pl-10 bg-slate-50 border-slate-200 focus:ring-cyan-500 focus:border-cyan-500 rounded-lg"
-                v-model="formData.name"
-                required
-              />
+            <div class="space-y-2">
+              <Label for="role" class="text-slate-700">Role Utama</Label>
+              <div class="relative">
+                <Briefcase class="absolute left-3 top-3 h-4 w-4 text-slate-400 z-10" />
+                <Select v-model="formData.role" placeholder="Pilih role Anda" class="pl-10">
+                  <template #default="{ selectOption }">
+                    <SelectItem
+                      v-for="role in ROLES"
+                      :key="role.value"
+                      :value="role.value"
+                      @select="selectOption(role.value)"
+                    >
+                      <div class="flex items-center gap-2">
+                        <div :class="`h-3 w-3 rounded-full ${role.color}`"></div>
+                        {{ role.label }}
+                      </div>
+                    </SelectItem>
+                  </template>
+                </Select>
+              </div>
             </div>
-          </div>
 
-          <div class="space-y-2">
-            <Label for="birthdate" class="text-slate-700">Tanggal Lahir</Label>
-            <div class="relative">
-              <Calendar class="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-              <Input
-                id="birthdate"
-                type="date"
-                class="pl-10 bg-slate-50 border-slate-200 focus:ring-cyan-500 focus:border-cyan-500 rounded-lg"
-                v-model="formData.birthdate"
-                required
-              />
-            </div>
-          </div>
-
-          <div class="space-y-2">
-            <Label for="role" class="text-slate-700">Role</Label>
-            <div class="relative">
-              <Briefcase class="absolute left-3 top-3 h-4 w-4 text-slate-400 z-10" />
-              <Select
-                v-model="formData.role"
-                placeholder="Pilih role Anda"
-                class="pl-10"
-              >
-                <template #default="{ selectOption }">
-                  <SelectItem
-                    v-for="role in ROLES"
-                    :key="role.value"
-                    :value="role.value"
-                    @select="selectOption(role.value)"
-                  >
-                    <div class="flex items-center gap-2">
-                      <div :class="`w-3 h-3 rounded-full ${role.color}`"></div>
-                      {{ role.label }}
-                    </div>
-                  </SelectItem>
-                </template>
-              </Select>
-            </div>
-          </div>
-
-          <div class="space-y-2">
-            <Label for="skills" class="text-slate-700">Skills</Label>
-            <div class="space-y-3">
-              <div class="flex gap-2">
+            <div class="space-y-2">
+              <Label for="skills" class="text-slate-700">Skills</Label>
+              <div class="flex flex-col gap-2 sm:flex-row">
                 <div class="relative flex-1">
                   <Tag class="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                   <Input
                     id="skills"
                     type="text"
-                    placeholder="Tambah skill (contoh: Vue, Python)"
-                    class="pl-10 bg-slate-50 border-slate-200 focus:ring-cyan-500 focus:border-cyan-500 rounded-lg"
+                    placeholder="Tambah skill, contoh: Vue, Python, Figma"
+                    class="rounded-xl border-emerald-100 bg-slate-50 pl-10"
                     v-model="skillInput"
                     @keypress.enter.prevent="handleAddSkill"
                   />
                 </div>
-                <Button
-                  type="button"
-                  @click="handleAddSkill"
-                  class="border-2 border-slate-200 text-slate-600 hover:border-cyan-500 hover:text-cyan-600 bg-transparent rounded-lg font-medium"
-                >
+                <Button type="button" variant="outline" class="rounded-xl border-emerald-200 px-5" @click="handleAddSkill">
                   Tambah
                 </Button>
               </div>
 
-              <div v-if="formData.skills.length > 0" class="flex flex-wrap gap-2 p-3 bg-cyan-50 border border-cyan-100 rounded-lg">
+              <div v-if="formData.skills.length > 0" class="flex flex-wrap gap-2 rounded-2xl border border-emerald-100 bg-emerald-50 p-3">
                 <Badge
                   v-for="(skill, index) in formData.skills"
                   :key="index"
-                  class="bg-slate-100 text-slate-600 rounded-full px-3 py-1 text-sm"
+                  class="bg-white text-emerald-700"
                 >
                   {{ skill }}
-                  <button
-                    type="button"
-                    @click="handleRemoveSkill(skill)"
-                    class="ml-2 hover:text-red-600"
-                  >
+                  <button type="button" class="ml-2 hover:text-red-600" @click="handleRemoveSkill(skill)">
                     <X class="h-3 w-3" />
                   </button>
                 </Badge>
               </div>
             </div>
-          </div>
 
-          <Button
-            type="submit"
-            class="w-full bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg shadow-sm font-medium"
-            :disabled="loading"
-          >
-            {{ loading ? 'Menyimpan...' : 'Simpan Profil' }}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+            <Button
+              type="submit"
+              class="h-12 w-full rounded-xl text-base shadow-sm shadow-emerald-200"
+              :disabled="loading"
+            >
+              {{ loading ? 'Menyimpan...' : 'Simpan Profil' }}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   </div>
 </template>

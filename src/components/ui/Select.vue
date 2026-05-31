@@ -15,7 +15,7 @@ const isOpen = ref(false)
 
 const triggerClass = computed(() =>
   cn(
-    'flex h-10 w-full items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+    'flex h-10 w-full items-center justify-between rounded-xl border border-emerald-100 bg-slate-50 px-3 py-2 text-sm ring-offset-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
     props.class
   )
 )
@@ -62,7 +62,7 @@ defineExpose({ isOpen, selectOption })
     
     <div
       v-if="isOpen"
-      class="absolute z-50 mt-1 w-full rounded-md border border-slate-200 bg-white shadow-md"
+      class="absolute z-50 mt-1 w-full overflow-hidden rounded-xl border border-emerald-100 bg-white shadow-lg shadow-emerald-100/60"
     >
       <slot :select-option="selectOption" />
     </div>

@@ -73,8 +73,10 @@ const handleCallback = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center">
-    <Loader2 class="h-8 w-8 animate-spin text-cyan-600" />
-    <p class="ml-2 text-slate-600">Sinkronisasi data akun...</p>
+  <div class="flex min-h-screen items-center justify-center bg-[#f7faf8]">
+    <div class="flex items-center rounded-2xl border border-emerald-100 bg-white px-5 py-4 shadow-sm shadow-emerald-100/70">
+      <Loader2 class="h-8 w-8 animate-spin text-emerald-600" />
+      <p class="ml-3 text-sm font-medium text-slate-600">Sinkronisasi data akun...</p>
+    </div>
   </div>
 </template>

@@ -29,6 +29,8 @@ import {
   UserCircle,
   ArrowRight,
   CheckCircle,
+  Sparkles,
+  MessageSquare,
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -40,7 +42,6 @@ onMounted(() => {
   roomStore.initRoom()
 })
 
-// Auto navigate ke room
 watch(
   () => [roomStore.activeRoom, roomStore.matchmakingStatus, roomStore.isNewMatch],
   ([activeRoom, matchmakingStatus, isNewMatch]) => {
@@ -61,25 +62,27 @@ const navigateTo = (path) => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-cyan-50">
-    <!-- HEADER -->
-    <div class="bg-white/80 backdrop-blur-md border-b border-slate-100 sticky top-0 z-10">
-      <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+  <div class="min-h-screen bg-[#f4f8f5] text-slate-800">
+    <header class="sticky top-0 z-30 border-b border-slate-200/70 bg-white/85 backdrop-blur-xl">
+      <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
         <router-link to="/dashboard" class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-xl flex items-center justify-center shadow-md">
-            <Users class="h-5 w-5 text-white" />
+          <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-950">
+            <Users class="h-5 w-5 text-emerald-300" />
           </div>
-          <h1 class="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-teal-500 bg-clip-text text-transparent">GroupMatch</h1>
+          <div>
+            <p class="text-lg font-semibold text-slate-950">GroupMatch</p>
+            <p class="hidden text-xs text-slate-500 sm:block">student workspace</p>
+          </div>
         </router-link>
 
         <DropdownMenu v-slot="{ isOpen, toggle, close }">
-          <Button variant="ghost" class="flex gap-3 hover:bg-slate-100/80" @click="toggle">
-            <Avatar class="ring-2 ring-cyan-100">
+          <Button variant="ghost" class="h-auto rounded-full px-2 py-1.5" @click="toggle">
+            <Avatar class="ring-2 ring-emerald-100">
               <AvatarImage :src="authStore.user?.avatar" />
-              <AvatarFallback class="bg-gradient-to-br from-cyan-500 to-teal-500 text-white">{{ authStore.user?.name?.[0] }}</AvatarFallback>
+              <AvatarFallback class="bg-emerald-600 text-white">{{ authStore.user?.name?.[0] }}</AvatarFallback>
             </Avatar>
-            <div class="hidden sm:block text-left">
-              <p class="text-sm font-semibold text-slate-700">{{ authStore.user?.name }}</p>
+            <div class="ml-3 hidden text-left sm:block">
+              <p class="text-sm font-semibold text-slate-900">{{ authStore.user?.name }}</p>
               <p class="text-xs text-slate-500">@{{ authStore.user?.username }}</p>
             </div>
           </Button>
@@ -99,160 +102,155 @@ const navigateTo = (path) => {
               <Settings class="mr-2 h-4 w-4" /> Pengaturan
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem @click="handleLogout(); close()" class="text-red-600 cursor-pointer focus:text-red-600">
+            <DropdownMenuItem @click="handleLogout(); close()" class="cursor-pointer text-red-600 focus:text-red-600">
               <LogOut class="mr-2 h-4 w-4" /> Keluar
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </div>
+    </header>
 
-    <!-- CONTENT -->
-    <div class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- PROFILE -->
-      <Card class="lg:sticky lg:top-24 border-0 shadow-lg bg-white/80 backdrop-blur-sm overflow-hidden">
-        <div class="h-20 bg-gradient-to-r from-cyan-500 to-teal-500"></div>
-        <CardContent class="pt-0 text-center relative">
-          <Avatar class="mx-auto h-24 w-24 -mt-12 ring-4 ring-white shadow-lg">
-            <AvatarImage :src="authStore.user?.avatar" />
-            <AvatarFallback class="text-2xl bg-gradient-to-br from-cyan-500 to-teal-500 text-white">{{ authStore.user?.name?.[0] }}</AvatarFallback>
-          </Avatar>
-          <h3 class="text-xl font-bold mt-4 text-slate-800">{{ authStore.user?.name }}</h3>
-          <p class="text-sm text-slate-500">@{{ authStore.user?.username }}</p>
+    <main class="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:py-8">
+      <section class="mb-6 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+        <div>
+          <p class="text-sm font-medium text-emerald-700">Dashboard</p>
+          <h1 class="mt-2 text-3xl font-semibold tracking-normal text-slate-950 sm:text-4xl">
+            Hai, {{ authStore.user?.name }}.
+          </h1>
+          <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
+            Kelola profil dan mulai matching tim sekarang.
+          </p>
+        </div>
+        <Button variant="outline" class="w-fit rounded-2xl border-emerald-200 bg-white" @click="navigateTo('/profile-setup')">
+          Edit Profil
+        </Button>
+      </section>
 
-          <Badge class="mt-3 bg-gradient-to-r from-cyan-500 to-teal-500 text-white border-0">
-            {{ authStore.user?.role || 'Member' }}
-          </Badge>
-
-          <div class="mt-6 pt-6 border-t border-slate-100">
-            <p class="text-xs uppercase text-slate-400 mb-3 flex items-center justify-center gap-1 font-medium">
-              <Tag class="h-3 w-3" /> Skills
-            </p>
-            <div class="flex flex-wrap justify-center gap-2">
-              <template v-if="authStore.user?.skills?.length">
-                <Badge
-                  v-for="(skill, index) in authStore.user.skills"
-                  :key="index"
-                  variant="outline"
-                  class="bg-slate-50 border-slate-200"
-                >
-                  {{ skill }}
-                </Badge>
-              </template>
-              <span v-else class="text-xs text-slate-400 italic">Belum ada skill ditambahkan</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <!-- MATCHMAKING & HISTORY -->
-      <div class="lg:col-span-2 space-y-6">
-        <!-- MATCHMAKING CARD -->
-        <Card class="border-0 shadow-lg bg-white/80 backdrop-blur-sm overflow-hidden relative">
-          <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 to-teal-500"></div>
-          <CardHeader class="text-center pb-4">
-            <div class="mx-auto w-16 h-16 bg-gradient-to-br from-cyan-100 to-teal-100 rounded-2xl flex items-center justify-center mb-4">
-              <Zap class="h-8 w-8 text-cyan-600" />
-            </div>
-            <CardTitle class="text-2xl text-slate-800">
-              {{ roomStore.activeRoom ? '🎉 Tim Aktif!' : 'Siap Cari Tim?' }}
-            </CardTitle>
-            <CardDescription class="text-slate-500">
-              {{ roomStore.activeRoom
-                ? 'Kamu sudah punya tim aktif. Kembali ke room untuk melanjutkan.'
-                : 'Temukan rekan tim terbaik dengan satu klik' }}
-            </CardDescription>
-          </CardHeader>
-          <CardContent class="flex flex-col items-center pb-8">
-            <template v-if="roomStore.activeRoom">
-              <Button
-                size="lg"
-                @click="navigateTo('/room')"
-                class="h-14 px-8 bg-gradient-to-r from-cyan-600 to-teal-500 hover:from-cyan-700 hover:to-teal-600 shadow-lg hover:shadow-xl transition-all"
-              >
-                Kembali ke Room <ArrowRight class="ml-2 h-5 w-5" />
-              </Button>
-            </template>
-            <template v-else-if="roomStore.matchmakingStatus === 'searching'">
-              <div class="text-center space-y-4">
-                <div class="w-20 h-20 rounded-full border-4 border-cyan-100 flex items-center justify-center mx-auto">
-                  <Loader2 class="h-10 w-10 animate-spin text-cyan-600" />
+      <section class="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
+        <Card class="overflow-hidden rounded-[1.75rem] border-slate-200 bg-white shadow-sm">
+          <CardContent class="p-0">
+            <div class="bg-white p-6 text-slate-900 sm:p-8">
+              <div class="flex items-start gap-4">
+                <div class="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-emerald-50">
+                  <Sparkles class="h-7 w-7 text-emerald-600" />
                 </div>
-                <p class="text-slate-600 font-medium">Mencari tim untukmu...</p>
-                <Button variant="outline" @click="roomStore.leaveRoom" class="mt-2">
-                  Batalkan Pencarian
-                </Button>
-              </div>
-            </template>
-            <template v-else-if="roomStore.matchmakingStatus === 'matched'">
-              <div class="text-center space-y-4">
-                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
-                  <CheckCircle class="h-10 w-10 text-green-600" />
+                <div>
+                  <p class="text-sm font-medium text-emerald-700">
+                    {{ roomStore.activeRoom ? 'Room aktif' : 'Siap matching' }}
+                  </p>
+                  <h2 class="mt-2 text-2xl font-semibold leading-tight text-slate-950">
+                    {{ roomStore.activeRoom ? 'Lanjutkan koordinasi timmu.' : 'Cari tim yang cocok dengan skill kamu.' }}
+                  </h2>
+                  <p class="mt-3 max-w-xl text-sm leading-6 text-slate-600">
+                    {{ roomStore.activeRoom
+                      ? 'Room masih tersedia untuk diskusi dan pembagian tugas.'
+                      : 'Mulai pencarian untuk menemukan anggota yang saling melengkapi.' }}
+                  </p>
                 </div>
-                <p class="text-green-600 font-medium">Tim ditemukan!</p>
               </div>
-            </template>
-            <template v-else>
-              <Button
-                size="lg"
-                @click="roomStore.startMatchmaking"
-                class="h-14 px-8 bg-gradient-to-r from-cyan-600 to-teal-500 hover:from-cyan-700 hover:to-teal-600 shadow-lg hover:shadow-xl transition-all"
-              >
-                <Zap class="mr-2 h-5 w-5" /> Cari Tim Sekarang
-              </Button>
-            </template>
+
+              <div class="mt-7">
+                <template v-if="roomStore.activeRoom">
+                  <Button size="lg" class="h-12 rounded-2xl bg-emerald-600 px-7 text-white hover:bg-emerald-700" @click="navigateTo('/room')">
+                    Kembali ke Room <ArrowRight class="ml-2 h-5 w-5" />
+                  </Button>
+                </template>
+                <template v-else-if="roomStore.matchmakingStatus === 'searching'">
+                  <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50">
+                      <Loader2 class="h-6 w-6 animate-spin text-emerald-600" />
+                    </div>
+                    <div>
+                      <p class="font-medium text-slate-900">Mencari tim untukmu...</p>
+                      <Button variant="outline" class="mt-3 rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900" @click="roomStore.leaveRoom">
+                        Batalkan
+                      </Button>
+                    </div>
+                  </div>
+                </template>
+                <template v-else-if="roomStore.matchmakingStatus === 'matched'">
+                  <div class="flex items-center gap-3">
+                    <CheckCircle class="h-6 w-6 text-emerald-600" />
+                    <p class="font-medium text-emerald-700">Tim ditemukan!</p>
+                  </div>
+                </template>
+                <template v-else>
+                  <Button size="lg" class="h-12 rounded-2xl bg-emerald-600 px-7 text-white hover:bg-emerald-700" @click="roomStore.startMatchmaking">
+                    <Zap class="mr-2 h-5 w-5" /> Cari Tim Sekarang
+                  </Button>
+                </template>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        <!-- HISTORY -->
-        <Card class="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-          <CardHeader class="pb-4">
-            <CardTitle class="flex gap-2 items-center text-slate-800">
-              <div class="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
-                <Users class="h-4 w-4 text-slate-600" />
+        <Card class="rounded-[1.75rem] border-slate-200 bg-white shadow-sm">
+          <CardContent class="p-5">
+            <div class="flex items-center gap-4">
+              <Avatar class="h-16 w-16 ring-4 ring-emerald-50">
+                <AvatarImage :src="authStore.user?.avatar" />
+                <AvatarFallback class="bg-emerald-600 text-xl text-white">{{ authStore.user?.name?.[0] }}</AvatarFallback>
+              </Avatar>
+              <div class="min-w-0">
+                <p class="truncate font-semibold text-slate-950">{{ authStore.user?.name }}</p>
+                <p class="text-xs text-slate-500">@{{ authStore.user?.username }}</p>
+                <Badge class="mt-2 bg-emerald-50 text-emerald-700">{{ authStore.user?.role || 'Member' }}</Badge>
               </div>
+            </div>
+
+            <div class="mt-5 border-t border-slate-100 pt-5">
+              <div class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900">
+                <Tag class="h-4 w-4 text-emerald-600" />
+                Skill
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <template v-if="authStore.user?.skills?.length">
+                  <Badge v-for="(skill, index) in authStore.user.skills" :key="index" variant="outline">
+                    {{ skill }}
+                  </Badge>
+                </template>
+                <p v-else class="text-sm leading-6 text-slate-500">Belum ada skill ditambahkan.</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section class="mt-5">
+        <Card class="rounded-[1.75rem] border-slate-200 bg-white shadow-sm">
+          <CardHeader>
+            <CardTitle class="flex items-center gap-2 text-lg font-semibold text-slate-950">
+              <MessageSquare class="h-4 w-4 text-emerald-600" />
               Riwayat Tim
             </CardTitle>
+            <CardDescription class="text-sm text-slate-500">Daftar aktivitas tim yang pernah kamu ikuti.</CardDescription>
           </CardHeader>
           <CardContent>
             <template v-if="roomStore.roomHistory.length === 0">
-              <div class="text-center py-8">
-                <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Users class="h-8 w-8 text-slate-300" />
-                </div>
-                <p class="text-sm text-slate-400">
-                  Belum ada riwayat tim
-                </p>
-                <p class="text-xs text-slate-300 mt-1">
-                  Riwayat akan muncul setelah kamu bergabung dengan tim
-                </p>
+              <div class="rounded-[1.5rem] border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
+                <Users class="mx-auto h-8 w-8 text-slate-300" />
+                <p class="mt-3 text-sm font-medium text-slate-500">Belum ada riwayat tim</p>
+                <p class="mt-1 text-xs text-slate-400">Riwayat muncul setelah kamu bergabung dengan tim.</p>
               </div>
             </template>
             <template v-else>
-              <div class="space-y-3">
+              <div class="divide-y divide-slate-100">
                 <div
                   v-for="(r, index) in roomStore.roomHistory"
                   :key="r.id"
-                  class="p-4 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-100 transition-colors"
+                  class="flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0"
                 >
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 bg-gradient-to-br from-cyan-100 to-teal-100 rounded-lg flex items-center justify-center">
-                        <Users class="h-5 w-5 text-cyan-600" />
-                      </div>
-                      <div>
-                        <p class="font-medium text-slate-700">Room #{{ r.room_id ? String(r.room_id).slice(-6) : index + 1 }}</p>
-                        <p class="text-xs text-slate-500">{{ r.action }}</p>
-                      </div>
-                    </div>
-                    <Badge variant="outline" class="text-xs">Selesai</Badge>
+                  <div>
+                    <p class="font-medium text-slate-800">Room #{{ r.room_id ? String(r.room_id).slice(-6) : index + 1 }}</p>
+                    <p class="mt-1 text-xs text-slate-500">{{ r.action }}</p>
                   </div>
+                  <Badge variant="outline">Selesai</Badge>
                 </div>
               </div>
             </template>
           </CardContent>
         </Card>
-      </div>
-    </div>
+      </section>
+    </main>
   </div>
 </template>

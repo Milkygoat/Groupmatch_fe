@@ -6,12 +6,11 @@ import { useRoomStore } from '@/stores/room'
 import { useToast } from '@/composables/useToast'
 import Button from '@/components/ui/Button.vue'
 import Input from '@/components/ui/Input.vue'
-import Badge from '@/components/ui/Badge.vue'
 import Avatar from '@/components/ui/Avatar.vue'
 import AvatarImage from '@/components/ui/AvatarImage.vue'
 import AvatarFallback from '@/components/ui/AvatarFallback.vue'
 import ScrollArea from '@/components/ui/ScrollArea.vue'
-import { Crown, Send, LogOut, Users, Copy, Loader2, Home } from 'lucide-vue-next'
+import { Crown, Send, LogOut, Users, Copy, Loader2, Home, MessageSquare } from 'lucide-vue-next'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -40,7 +39,6 @@ onMounted(() => {
   isInitialLoad.value = false
 })
 
-// Redirect logic
 watch(
   () => [roomStore.activeRoom, roomStore.isReconnecting],
   ([activeRoom, isReconnecting]) => {
@@ -101,197 +99,174 @@ const handleCopyRoomId = () => {
 </script>
 
 <template>
-  <!-- Loading: Reconnecting -->
-  <div v-if="roomStore.isReconnecting" class="h-screen flex flex-col items-center justify-center bg-gradient-to-br from-cyan-50 via-white to-teal-50">
-    <div class="w-20 h-20 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-2xl flex items-center justify-center shadow-lg mb-6">
-      <Loader2 class="h-10 w-10 text-white animate-spin" />
+  <div v-if="roomStore.isReconnecting" class="flex h-screen flex-col items-center justify-center bg-[#f4f8f5]">
+    <div class="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-950">
+      <Loader2 class="h-8 w-8 animate-spin text-emerald-300" />
     </div>
-    <h2 class="text-xl font-bold bg-gradient-to-r from-cyan-600 to-teal-500 bg-clip-text text-transparent mb-2">
-      Menghubungkan...
-    </h2>
-    <p class="text-slate-400 text-sm">
-      Menghubungkan kembali ke room
-    </p>
+    <h2 class="mb-2 text-xl font-semibold text-slate-950">Menghubungkan...</h2>
+    <p class="text-sm text-slate-500">Menghubungkan kembali ke room</p>
   </div>
 
-  <!-- Loading: Has saved room but not loaded yet -->
-  <div v-else-if="!roomStore.activeRoom && localStorage.getItem('activeRoom')" class="h-screen flex flex-col items-center justify-center bg-gradient-to-br from-cyan-50 via-white to-teal-50">
-    <div class="w-20 h-20 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-2xl flex items-center justify-center shadow-lg mb-6">
-      <Loader2 class="h-10 w-10 text-white animate-spin" />
+  <div v-else-if="!roomStore.activeRoom && localStorage.getItem('activeRoom')" class="flex h-screen flex-col items-center justify-center bg-[#f4f8f5]">
+    <div class="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-950">
+      <Loader2 class="h-8 w-8 animate-spin text-emerald-300" />
     </div>
-    <h2 class="text-xl font-bold bg-gradient-to-r from-cyan-600 to-teal-500 bg-clip-text text-transparent mb-2">
-      Memuat Room
-    </h2>
-    <p class="text-slate-400 text-sm">Mohon tunggu sebentar...</p>
+    <h2 class="mb-2 text-xl font-semibold text-slate-950">Memuat Room</h2>
+    <p class="text-sm text-slate-500">Mohon tunggu sebentar...</p>
   </div>
 
-  <!-- No active room -->
   <div v-else-if="!roomStore.activeRoom"></div>
 
-  <!-- Room Content -->
-  <div v-else class="h-screen flex flex-col bg-gradient-to-br from-slate-50 via-white to-cyan-50">
-    <!-- Header -->
-    <div class="bg-white/80 backdrop-blur-md border-b border-slate-100 px-4 py-3">
-      <div class="max-w-7xl mx-auto flex justify-between items-center">
-        <div class="flex items-center gap-4">
-          <div class="flex items-center gap-2">
-            <div class="w-8 h-8 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-lg flex items-center justify-center">
-              <Users class="h-4 w-4 text-white" />
-            </div>
-            <span class="font-bold bg-gradient-to-r from-cyan-600 to-teal-500 bg-clip-text text-transparent hidden sm:inline">GroupMatch</span>
+  <div v-else class="flex h-screen bg-[#f4f8f5] text-slate-800">
+    <aside class="hidden w-[280px] flex-col border-r border-slate-200 bg-white lg:flex">
+      <div class="border-b border-slate-100 p-4">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-950">
+            <Users class="h-5 w-5 text-emerald-300" />
           </div>
-          <div class="h-6 w-px bg-slate-200 hidden sm:block"></div>
-          <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-lg">
-            <span class="text-xs text-slate-500">Room:</span>
-            <code class="text-sm font-mono font-medium text-slate-700">
-              {{ roomStore.activeRoom?.id ? String(roomStore.activeRoom.id).slice(-8) : '...' }}
-            </code>
-            <Button size="icon" variant="ghost" class="h-6 w-6" @click="handleCopyRoomId">
-              <Copy class="h-3 w-3" />
-            </Button>
+          <div>
+            <p class="font-semibold text-slate-950">GroupMatch</p>
+            <p class="text-xs text-slate-500">Team room</p>
           </div>
-        </div>
-        <div class="flex items-center gap-2">
-          <Badge class="bg-gradient-to-r from-cyan-500 to-teal-500 text-white border-0 shadow-sm">
-            <Users class="h-3 w-3 mr-1" />
-            {{ roomStore.activeRoom?.members?.length || 0 }} Anggota
-          </Badge>
         </div>
       </div>
-    </div>
 
-    <!-- Navbar -->
-    <div class="bg-white border-b border-slate-100 px-4 py-3">
-      <div class="max-w-7xl mx-auto flex justify-between items-center">
-        <h1 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-          <Crown class="h-5 w-5 text-amber-500" />
-          Team Workspace
-        </h1>
-        <div class="flex gap-2">
-          <Button variant="ghost" size="sm" @click="handleBackToDashboard" class="text-slate-600 hover:text-slate-800">
-            <Home class="mr-2 h-4 w-4" /> Dashboard
-          </Button>
-          <Button v-if="isLeader()" variant="destructive" size="sm" @click="handleEndSession" class="shadow-sm">
-            <Crown class="mr-2 h-4 w-4" /> End Session
-          </Button>
-          <Button variant="outline" size="sm" @click="handleLeaveRoom" class="border-slate-200">
-            <LogOut class="mr-2 h-4 w-4" /> Keluar
+      <div class="border-b border-slate-100 p-4">
+        <p class="text-xs font-medium uppercase text-slate-400">Room ID</p>
+        <div class="mt-2 flex items-center gap-2">
+          <code class="min-w-0 flex-1 truncate rounded-xl bg-slate-50 px-3 py-2 font-mono text-sm text-slate-700">
+            {{ roomStore.activeRoom?.id ? String(roomStore.activeRoom.id).slice(-8) : '...' }}
+          </code>
+          <Button size="icon" variant="outline" class="h-9 w-9 rounded-xl border-slate-200" @click="handleCopyRoomId">
+            <Copy class="h-4 w-4" />
           </Button>
         </div>
       </div>
-    </div>
 
-    <div class="flex-1 flex max-w-7xl mx-auto w-full p-4 gap-4 overflow-hidden">
-      <!-- Sidebar - Members -->
-      <div class="w-72 hidden md:flex bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-100 shadow-lg flex-col overflow-hidden">
-        <div class="p-4 border-b border-slate-100 bg-gradient-to-r from-cyan-50 to-teal-50">
-          <h3 class="font-semibold text-slate-700 flex items-center gap-2">
-            <Users class="h-4 w-4 text-cyan-600" /> Anggota Tim ({{ roomStore.activeRoom?.members?.length || 0 }})
-          </h3>
+      <div class="flex min-h-0 flex-1 flex-col p-4">
+        <div class="mb-3 flex items-center justify-between">
+          <p class="text-sm font-semibold text-slate-950">Anggota</p>
+          <span class="text-xs text-slate-500">{{ roomStore.activeRoom?.members?.length || 0 }} orang</span>
         </div>
-        <div class="flex-1 p-3 space-y-2 overflow-y-auto">
-          <div v-if="!roomStore.activeRoom?.members || roomStore.activeRoom.members.length === 0" class="text-center py-4">
+
+        <div class="min-h-0 flex-1 space-y-1 overflow-y-auto">
+          <div v-if="!roomStore.activeRoom?.members || roomStore.activeRoom.members.length === 0" class="py-4 text-center">
             <p class="text-sm text-slate-400">Memuat anggota...</p>
           </div>
           <div
             v-for="m in roomStore.activeRoom?.members || []"
             :key="m.id"
             :class="[
-              'flex gap-3 p-3 rounded-xl transition-all',
-              m.id === authStore.user?.id
-                ? 'bg-gradient-to-r from-cyan-50 to-teal-50 border border-cyan-100'
-                : 'hover:bg-slate-50'
+              'flex gap-3 rounded-2xl p-3 transition-colors',
+              m.id === authStore.user?.id ? 'bg-emerald-50' : 'hover:bg-slate-50'
             ]"
           >
-            <Avatar class="h-10 w-10 ring-2 ring-white shadow-sm">
+            <Avatar class="h-9 w-9">
               <AvatarImage :src="m.avatar || ''" />
-              <AvatarFallback class="bg-gradient-to-br from-cyan-500 to-teal-500 text-white text-sm">
+              <AvatarFallback class="bg-emerald-600 text-xs text-white">
                 {{ m.name?.[0] || 'U' }}
               </AvatarFallback>
             </Avatar>
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-slate-700 truncate flex items-center gap-1">
-                <template v-if="m.id === authStore.user?.id">
-                  <span class="text-cyan-600">(Kamu)</span>
-                </template>
-                <template v-else>
-                  {{ m.name || m.username || `User ${String(m.id).slice(-4)}` }}
-                </template>
+            <div class="min-w-0 flex-1">
+              <p class="flex items-center gap-1 truncate text-sm font-medium text-slate-800">
+                <template v-if="m.id === authStore.user?.id">Kamu</template>
+                <template v-else>{{ m.name || m.username || `User ${String(m.id).slice(-4)}` }}</template>
                 <Crown v-if="m.id === roomStore.activeRoom?.leaderId" class="h-3.5 w-3.5 text-amber-500" />
               </p>
-              <p class="text-xs text-slate-500 truncate">
-                {{ m.role || 'Member' }}<template v-if="m.username"> • @{{ m.username }}</template>
+              <p class="truncate text-xs text-slate-500">
+                {{ m.role || 'Member' }}<template v-if="m.username"> - @{{ m.username }}</template>
               </p>
             </div>
           </div>
         </div>
       </div>
+    </aside>
 
-      <!-- Chat Area -->
-      <div class="flex-1 bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-100 shadow-lg flex flex-col overflow-hidden">
-        <div class="p-4 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
-          <h3 class="font-semibold text-slate-700 flex items-center gap-2">
-            <Send class="h-4 w-4 text-cyan-600" /> Chat Room
-          </h3>
-        </div>
-
-        <ScrollArea class="flex-1 p-4">
-          <div class="space-y-4">
-            <div v-if="roomStore.messages.length === 0" class="text-center py-12">
-              <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Send class="h-8 w-8 text-slate-300" />
-              </div>
-              <p class="text-slate-400 text-sm">Belum ada pesan</p>
-              <p class="text-slate-300 text-xs mt-1">Mulai percakapan dengan timmu!</p>
+    <main class="flex min-w-0 flex-1 flex-col">
+      <header class="border-b border-slate-200 bg-white/85 px-4 py-3 backdrop-blur-xl">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <MessageSquare class="h-5 w-5 text-emerald-600" />
+              <h1 class="text-lg font-semibold text-slate-950">Diskusi Tim</h1>
             </div>
-            <div
-              v-for="msg in roomStore.messages"
-              :key="msg.id"
-              :class="['flex gap-3', msg.userId === authStore.user?.id ? 'flex-row-reverse' : '']"
-            >
-              <Avatar class="h-8 w-8 ring-2 ring-white shadow-sm flex-shrink-0">
-                <AvatarFallback :class="[
-                  'text-xs',
-                  msg.userId === authStore.user?.id
-                    ? 'bg-gradient-to-br from-cyan-500 to-teal-500 text-white'
-                    : 'bg-slate-200'
-                ]">
-                  {{ msg.username?.[0] || 'U' }}
-                </AvatarFallback>
-              </Avatar>
-              <div :class="['max-w-[70%]', msg.userId === authStore.user?.id ? 'text-right' : '']">
-                <p class="text-xs text-slate-400 mb-1 px-1">
-                  {{ msg.userId === authStore.user?.id ? 'Kamu' : msg.username }}
-                </p>
-                <div :class="[
-                  'px-4 py-2.5 rounded-2xl text-sm shadow-sm',
-                  msg.userId === authStore.user?.id
-                    ? 'bg-gradient-to-r from-cyan-500 to-teal-500 text-white rounded-br-md'
-                    : 'bg-slate-100 text-slate-700 rounded-bl-md'
-                ]">
-                  {{ msg.text }}
+            <p class="mt-1 text-xs text-slate-500">Gunakan ruang ini untuk koordinasi dan pembagian tugas.</p>
+          </div>
+          <div class="flex flex-wrap justify-end gap-2">
+            <Button variant="ghost" size="sm" class="rounded-xl" @click="handleBackToDashboard">
+              <Home class="mr-2 h-4 w-4" /> Dashboard
+            </Button>
+            <Button v-if="isLeader()" variant="destructive" size="sm" class="rounded-xl" @click="handleEndSession">
+              <Crown class="mr-2 h-4 w-4" /> End Session
+            </Button>
+            <Button variant="outline" size="sm" class="rounded-xl border-slate-200 bg-white" @click="handleLeaveRoom">
+              <LogOut class="mr-2 h-4 w-4" /> Keluar
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <section class="flex min-h-0 flex-1 flex-col p-4">
+        <div class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-sm">
+          <ScrollArea class="max-h-none flex-1 p-5">
+            <div class="space-y-5">
+              <div v-if="roomStore.messages.length === 0" class="py-16 text-center">
+                <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50">
+                  <Send class="h-7 w-7 text-emerald-300" />
+                </div>
+                <p class="text-sm font-medium text-slate-500">Belum ada pesan</p>
+                <p class="mt-1 text-xs text-slate-400">Mulai percakapan dengan timmu.</p>
+              </div>
+
+              <div
+                v-for="msg in roomStore.messages"
+                :key="msg.id"
+                :class="['flex gap-3', msg.userId === authStore.user?.id ? 'flex-row-reverse' : '']"
+              >
+                <Avatar class="h-9 w-9 flex-shrink-0">
+                  <AvatarFallback :class="[
+                    'text-xs',
+                    msg.userId === authStore.user?.id ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'
+                  ]">
+                    {{ msg.username?.[0] || 'U' }}
+                  </AvatarFallback>
+                </Avatar>
+                <div :class="['max-w-[78%]', msg.userId === authStore.user?.id ? 'text-right' : '']">
+                  <p class="mb-1 px-1 text-xs text-slate-400">
+                    {{ msg.userId === authStore.user?.id ? 'Kamu' : msg.username }}
+                  </p>
+                  <div :class="[
+                    'rounded-[1.25rem] px-4 py-3 text-sm leading-6',
+                    msg.userId === authStore.user?.id
+                      ? 'rounded-br-md bg-slate-950 text-white'
+                      : 'rounded-bl-md bg-slate-100 text-slate-700'
+                  ]">
+                    {{ msg.text }}
+                  </div>
                 </div>
               </div>
+              <div ref="messagesEndRef" />
             </div>
-            <div ref="messagesEndRef" />
-          </div>
-        </ScrollArea>
+          </ScrollArea>
 
-        <form @submit.prevent="handleSendMessage" class="p-4 border-t border-slate-100 bg-slate-50/80 flex gap-3">
-          <Input
-            v-model="messageInput"
-            placeholder="Ketik pesan..."
-            class="flex-1 h-11 bg-white border-slate-200 focus:border-cyan-300 rounded-xl"
-          />
-          <Button
-            type="submit"
-            :disabled="!messageInput.trim()"
-            class="h-11 px-5 bg-gradient-to-r from-cyan-600 to-teal-500 hover:from-cyan-700 hover:to-teal-600 rounded-xl shadow-md"
-          >
-            <Send class="h-4 w-4" />
-          </Button>
-        </form>
-      </div>
-    </div>
+          <form @submit.prevent="handleSendMessage" class="border-t border-slate-100 bg-white p-3">
+            <div class="flex gap-2 rounded-2xl bg-slate-50 p-2">
+              <Input
+                v-model="messageInput"
+                placeholder="Tulis pesan..."
+                class="h-11 flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+              />
+              <Button
+                type="submit"
+                :disabled="!messageInput.trim()"
+                class="h-11 rounded-xl bg-slate-950 px-5 text-emerald-100 hover:bg-slate-800"
+              >
+                <Send class="h-4 w-4" />
+              </Button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
   </div>
 </template>

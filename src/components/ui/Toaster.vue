@@ -23,7 +23,7 @@ const getVariantClasses = (variant) => {
     case 'success':
       return 'bg-green-50 border-green-200 text-green-800'
     default:
-      return 'bg-white border-slate-200 text-slate-800'
+      return 'bg-white border-emerald-100 text-slate-800'
   }
 }
 </script>
@@ -35,7 +35,7 @@ const getVariantClasses = (variant) => {
         v-for="toast in toasts"
         :key="toast.id"
         :class="[
-          'rounded-lg border p-4 shadow-lg',
+          'rounded-xl border p-4 shadow-lg shadow-emerald-100/50',
           getVariantClasses(toast.variant)
         ]"
       >
@@ -46,7 +46,7 @@ const getVariantClasses = (variant) => {
               'h-5 w-5 flex-shrink-0',
               toast.variant === 'destructive' ? 'text-red-500' :
               toast.variant === 'success' ? 'text-green-500' :
-              'text-cyan-500'
+              'text-emerald-600'
             ]"
           />
           <div class="flex-1">

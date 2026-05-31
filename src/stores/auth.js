@@ -93,9 +93,7 @@ export const useAuthStore = defineStore('auth', () => {
   const register = async (userData) => {
     try {
       await api.post('/auth/register', {
-        name: userData.name,
         email: userData.email,
-        username: userData.username,
         password: userData.password,
         confirm_password: userData.password
       })
@@ -179,6 +177,7 @@ export const useAuthStore = defineStore('auth', () => {
   const logout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('currentUser')
+    localStorage.removeItem('pendingProfileSetupEmail')
     user.value = null
   }
 

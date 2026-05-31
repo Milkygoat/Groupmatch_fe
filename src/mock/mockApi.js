@@ -156,10 +156,10 @@ const mockHandlers = {
 
   'POST /auth/register': async (data) => {
     await delay(500)
-    const { email, name, username, password } = data
+    const { email, password } = data
 
-    if (!email || !password || !name) {
-      throw { response: { status: 400, data: { detail: 'Semua field harus diisi' } } }
+    if (!email || !password) {
+      throw { response: { status: 400, data: { detail: 'Email dan password harus diisi' } } }
     }
 
     return { message: 'Registration successful' }
