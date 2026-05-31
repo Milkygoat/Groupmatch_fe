@@ -211,6 +211,19 @@ export const useRoomStore = defineStore('room', () => {
           }
           return m
         })
+      } else if (payload.type === 'room_ended') {
+        console.log('[RoomStore] Room has been ended by leader')
+        toast({
+          title: 'Sesi Selesai',
+          description: 'Leader telah membubarkan room ini.',
+          variant: 'destructive',
+        })
+        socket?.close()
+        activeRoom.value = null
+        messages.value = []
+        matchmakingStatus.value = 'idle'
+        isNewMatch.value = false
+        localStorage.removeItem('activeRoom')
       }
     }
 
