@@ -1,26 +1,15 @@
 <script setup>
-import { onMounted, computed, ref } from 'vue'
+import { onMounted, computed } from 'vue'
 import { RouterView } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { MOCK_MODE } from '@/services/api'
 import Toaster from '@/components/ui/Toaster.vue'
-import { Users, Server } from 'lucide-vue-next'
+import { Loader2, Users } from 'lucide-vue-next'
 
 const authStore = useAuthStore()
-const serverInfo = ref(null)
 
 onMounted(() => {
   authStore.initAuth()
-  
-  // Fetch info backend dari Load Balancer
-  fetch('https://api.groupmatch.web.id/who')
-    .then(res => res.json())
-    .then(data => {
-      serverInfo.value = data.server
-    })
-    .catch(() => {
-      serverInfo.value = 'Unknown'
-    })
 })
 
 const isLoading = computed(() => authStore.loading)
@@ -42,15 +31,6 @@ const isLoading = computed(() => authStore.loading)
   <!-- Main App -->
   <template v-else>
     <RouterView />
-
-    <!-- Info Server Load Balancer -->
-    <div
-      v-if="serverInfo"
-      class="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg"
-    >
-      <Server class="w-4 h-4" />
-      <span>🖥️ {{ serverInfo }} via Nginx LB (GCP)</span>
-    </div>
 
     <!-- Mock Mode Banner -->
     <div
