@@ -77,3 +77,8 @@ app.include_router(ws_router)
 @app.get("/")
 def home():
     return {"message": "Backend Group Match API Running"}
+
+@app.get("/who")
+def who():
+    server_name = os.getenv("SERVER_NAME", "Backend Unknown")
+    return {"server": server_name}
