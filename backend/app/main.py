@@ -1,4 +1,5 @@
 import os
+import socket
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
@@ -82,3 +83,10 @@ def home():
 def who():
     server_name = os.getenv("SERVER_NAME", "Backend Unknown")
     return {"server": server_name}
+
+@app.get("/")
+def home():
+    return {
+        "message": "Backend Group Match API",
+        "handled_by": socket.gethostname()
+    }
