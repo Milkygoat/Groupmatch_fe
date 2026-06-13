@@ -2,17 +2,15 @@ import os
 import socket
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from dotenv import load_dotenv
-
 
 # LOAD ENV (LOCAL / PROD)
 ENV = os.getenv("ENV", "local")
-
 if ENV == "production":
     load_dotenv(".env.railway", override=True)
 else:
     load_dotenv(".env.local", override=True)
-
 
 # DATABASE & MODELS
 from app.db.database import Base, engine
@@ -22,7 +20,6 @@ from app.matchmaking.models import RoomMember, MatchmakingQueue
 
 Base.metadata.create_all(bind=engine)
 
-
 # ROUTERS
 from app.auth.router import router as auth_router
 from app.profile.router import router as profile_router
@@ -30,15 +27,12 @@ from app.matchmaking.router import router as matchmaking_router
 from app.rooms.router import router as room_router
 from app.ws.router import router as ws_router
 
-
 # CONFIG
 import cloudinary
 from app.core.config import settings
 
-
 # APP
 app = FastAPI(debug=True)
-
 
 # CORS
 allowed_origins = [
@@ -46,10 +40,9 @@ allowed_origins = [
     "http://127.0.0.1:3000",
     "https://groupmatchfe-production.up.railway.app",
     "https://groupmatchfe.up.railway.app",
-    "https://groupmatch.web.id", 
+    "https://groupmatch.web.id",
     "https://www.groupmatch.web.id"
 ]
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
@@ -58,13 +51,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+# MIDDLEWARE: tandai response dengan nama service yang menangani request
+class ServedByMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        response.headers["X-Served-By"] = os.getenv(
+            "RAILWAY_SERVICE_NAME", socket.gethostname()
+        )
+        return response
+
+
+app.add_middleware(ServedByMiddleware)
+
 # CLOUDINARY
 cloudinary.config(
     cloud_name=settings.CLOUDINARY_CLOUD_NAME,
     api_key=settings.CLOUDINARY_API_KEY,
     api_secret=settings.CLOUDINARY_API_SECRET,
 )
-
 
 # ROUTER REGISTER
 app.include_router(auth_router)
@@ -77,16 +82,14 @@ app.include_router(ws_router)
 # ROOT
 @app.get("/")
 def home():
-    return {"message": "Backend Group Match API Running"}
+    return {
+        "message": "Backend Group Match API Running",
+        "handled_by": os.getenv("RAILWAY_SERVICE_NAME", socket.gethostname())
+    }
+
 
 @app.get("/who")
 def who():
-    server_name = os.getenv("SERVER_NAME", "Backend Unknown")
-    return {"server": server_name}
-
-@app.get("/")
-def home():
     return {
-        "message": "Backend Group Match API",
-        "handled_by": socket.gethostname()
+        "server": os.getenv("RAILWAY_SERVICE_NAME", socket.gethostname())
     }
